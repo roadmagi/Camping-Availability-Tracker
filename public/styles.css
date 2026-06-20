@@ -44,13 +44,21 @@ main{padding:18px 22px 92px}
 html{scroll-behavior:smooth}
 #status{padding:10px 22px;font-size:14px;color:#555}
 #status.err{color:#b34700}
-.site.fav .lbl{background:#fff8e1;box-shadow:7px 0 7px -5px rgba(0,0,0,.10),inset 4px 0 0 #f4c430}
-.site.fav .lbl-id{font-weight:800;color:#7a5c00}
-.lbl .star{color:#f4b400}
-.fav-toggle{font-size:13px;padding:5px 11px;border-radius:14px;border:1px solid #e6c200;background:#fff8e1;color:#7a5c00;cursor:pointer;font-weight:600}
-.fav-toggle.on{background:#f4c430;color:#3a2c00;border-color:#caa200}
-.fav-toggle[hidden]{display:none}
-body.fav-only .site:not(.fav){display:none}
+.tier-tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:5px;vertical-align:middle;white-space:nowrap}
+.tier-tag.best{background:#f4c430;color:#3a2c00}
+.tier-tag.rec{background:#2e7d32;color:#fff}
+.site.best .lbl{background:#fff8e1;box-shadow:7px 0 7px -5px rgba(0,0,0,.10),inset 4px 0 0 #f4c430}
+.site.best .lbl-id{font-weight:800;color:#7a5c00}
+.site.rec .lbl{background:#eef6ee;box-shadow:7px 0 7px -5px rgba(0,0,0,.10),inset 4px 0 0 #2e7d32}
+.site.rec .lbl-id{font-weight:700;color:#1f5d22}
+/* 3-state tier filter on <body>: default = all sites */
+body.f-listed .site:not(.best):not(.rec){display:none}
+body.f-best .site:not(.best){display:none}
+.tier-filter{display:inline-flex;border:1px solid #cdd8d1;border-radius:14px;overflow:hidden}
+.tier-filter[hidden]{display:none}
+.tier-filter button{font-size:12px;font-weight:600;padding:5px 11px;border:0;background:#fff;color:#33503f;cursor:pointer}
+.tier-filter button+button{border-left:1px solid #cdd8d1}
+.tier-filter button.on{background:#0b3d2e;color:#fff}
 .info-btn{display:inline-block;cursor:pointer;color:#fff;background:#0b3d2e;font-size:12px;font-weight:600;margin-left:9px;padding:2px 10px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.25);vertical-align:middle;white-space:nowrap}
 .info-btn:hover{background:#16604a}
 .info-btn.open{background:#b34700}

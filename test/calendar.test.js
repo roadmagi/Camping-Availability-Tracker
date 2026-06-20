@@ -23,18 +23,24 @@ test('renderCal marks available cell clickable with data-date, and today', () =>
   assert.match(html, /class="cell booked" data-date="2026-07-05"/);
   assert.match(html, /July 2026/);
 });
-test('siteRowHtml renders label + one cal per month; non-favorite has no star/fav', () => {
+test('siteRowHtml renders label + one cal per month; plain tier has no tag', () => {
   const site = { shortName: '07', name: 'Oak', type: 'Tent', cost: 25, days: {} };
   const html = C.siteRowHtml(site, [[2026,6],[2026,7]], '2026-07-04');
   assert.match(html, /#07 Oak/);
   assert.match(html, /\$25/);
-  assert.ok(!/★/.test(html));                 // no favorite star
-  assert.match(html, /<div class="site">/);   // no fav class
+  assert.ok(!/tier-tag/.test(html));          // no tier tag
+  assert.match(html, /<div class="site">/);   // no tier class
   assert.equal((html.match(/class="cal"/g) || []).length, 2); // two months
 });
-test('siteRowHtml renders ★ and .fav class for a favorite site', () => {
-  const site = { shortName: '07', name: 'Oak', type: '', cost: null, days: {}, favorite: true };
+test('siteRowHtml renders 베스트 tag + .best for tier best', () => {
+  const site = { shortName: '07', name: 'Oak', type: '', cost: null, days: {}, tier: 'best' };
   const html = C.siteRowHtml(site, [[2026,6]], '2026-07-04');
-  assert.match(html, /<div class="site fav">/);
-  assert.match(html, /<span class="star">★<\/span>/);
+  assert.match(html, /<div class="site best">/);
+  assert.match(html, /<span class="tier-tag best">★ 베스트<\/span>/);
+});
+test('siteRowHtml renders 추천 tag + .rec for tier recommended', () => {
+  const site = { shortName: '12', name: '', type: '', cost: null, days: {}, tier: 'recommended' };
+  const html = C.siteRowHtml(site, [[2026,6]], '2026-07-04');
+  assert.match(html, /<div class="site rec">/);
+  assert.match(html, /<span class="tier-tag rec">추천<\/span>/);
 });

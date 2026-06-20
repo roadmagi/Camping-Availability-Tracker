@@ -27,12 +27,18 @@
   <label>Start:
     <input type="month" id="startSel" />
   </label>
-  <button id="favToggle" class="fav-toggle" type="button" hidden>★ Favorites only</button>
+  <div class="tier-filter" id="tierFilter" hidden>
+    <button data-f="all" class="on" type="button">전체 All</button>
+    <button data-f="listed" type="button">추천+베스트</button>
+    <button data-f="best" type="button">베스트 Best</button>
+  </div>
   <div class="legend">
     <span><i class="sw available"></i>Available</span>
     <span><i class="sw booked"></i>Booked</span>
     <span><i class="sw closed"></i>Closed/Unavailable</span>
     <span><i class="sw" style="box-shadow:inset 0 0 0 2px #1565c0;background:#fff"></i>Today</span>
+    <span><i class="sw" style="background:#f4c430"></i>베스트 Best</span>
+    <span><i class="sw" style="background:#2e7d32"></i>추천 Recommended</span>
   </div>
   <div id="status"></div>
 </div>

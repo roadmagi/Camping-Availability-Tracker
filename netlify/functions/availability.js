@@ -6,12 +6,14 @@ const TTL = 20 * 60 * 1000;
 
 // Build norm(parkName) -> favorites[] / description from the personal config
 // (bundled at deploy). Both are applied on the way OUT (egress), never cached.
-const _favByPark = {};
+const _favByPark = {};   // best tier (베스트)
+const _recByPark = {};   // recommended tier (추천) = the full preferred `sites` list
 const _descByPark = {};
 for (const p of (PREFS.parks || [])) {
   if (!p || !p.park) continue;
   const k = nj.norm(p.park);
   if (p.favorites && p.favorites.length) _favByPark[k] = p.favorites;
+  if (p.sites && p.sites.length) _recByPark[k] = p.sites;
   if (p.description) _descByPark[k] = p.description;
 }
 // exact match, else loose includes (mirrors the CLI's applyFavorites matching)
@@ -24,6 +26,7 @@ function _byPark(map, parkName) {
   return undefined;
 }
 function favoritesFor(parkName) { return _byPark(_favByPark, parkName) || []; }
+function recommendedFor(parkName) { return _byPark(_recByPark, parkName) || []; }
 function descriptionFor(parkName) { return _byPark(_descByPark, parkName) || ''; }
 
 // Coarse per-instance rate limit on COLD fetches. The cache already absorbs
@@ -42,13 +45,14 @@ function _resetRateLimit() { _rlStart = 0; _rlCount = 0; }
 
 exports.handler = async (event) => {
   const q = (event && event.queryStringParameters) || {};
-  let key = null, favs = [], desc = '';
+  let key = null, rec = [], best = [], desc = '';
   try {
     await connect(event);
     const parks = await nj.getParks();
     const park = parks.find((p) => String(p.id) === String(q.park));
     if (!park) return json(400, { error: 'Unknown or missing park id' });
-    favs = favoritesFor(park.name);
+    best = favoritesFor(park.name);
+    rec = recommendedFor(park.name);
     desc = descriptionFor(park.name);
 
     let months = parseInt(q.months, 10);
@@ -61,11 +65,11 @@ exports.handler = async (event) => {
     key = availKey(park.id, startIso, months);
 
     const cached = await getCache('availability', key);
-    if (fresh(cached, TTL)) return json(200, decorate(cached.data, favs, desc));
+    if (fresh(cached, TTL)) return json(200, decorate(cached.data, rec, best, desc));
 
     // A cold fetch is required — apply the rate limit.
     if (!_coldAllowed()) {
-      if (cached) return json(200, decorate({ ...cached.data, stale: true }, favs, desc)); // expired but present
+      if (cached) return json(200, decorate({ ...cached.data, stale: true }, rec, best, desc)); // expired but present
       return json(429, { error: 'Busy right now — please retry in a moment.' });
     }
 
@@ -80,13 +84,13 @@ exports.handler = async (event) => {
       sites: avail.sites,
     };
     await setCache('availability', key, payload);
-    return json(200, decorate(payload, favs, desc));
+    return json(200, decorate(payload, rec, best, desc));
   } catch (e) {
     console.error('availability: ' + (e && e.message));
     if (key) {
       try {
         const stale = await getCache('availability', key);
-        if (stale) return json(200, decorate({ ...stale.data, stale: true }, favs, desc));
+        if (stale) return json(200, decorate({ ...stale.data, stale: true }, rec, best, desc));
       } catch (_) { /* Blobs unavailable too — fall through to 502 */ }
     }
     return json(502, { error: 'Could not load availability right now. Try again shortly.' });
@@ -95,10 +99,10 @@ exports.handler = async (event) => {
 exports._resetRateLimit = _resetRateLimit;
 exports.RATE_LIMIT_MAX = RL_MAX;
 
-// Apply favorites (mark+sort sites) and the park description on the response
-// (not in the cache). favs/desc come from the personal config.
-function decorate(data, favs, desc) {
-  return { ...data, description: desc || '', sites: nj.markFavorites(data.sites, favs) };
+// Tag sites by tier (best/recommended/plain), sort, and attach the park
+// description on the response (not in the cache). rec/best/desc come from config.
+function decorate(data, rec, best, desc) {
+  return { ...data, description: desc || '', sites: nj.markTiers(data.sites, rec, best) };
 }
 function json(status, obj) {
   return { statusCode: status, headers: { 'content-type': 'application/json' }, body: JSON.stringify(obj) };

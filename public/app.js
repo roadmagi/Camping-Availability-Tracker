@@ -7,7 +7,7 @@
   var mainEl = document.getElementById('main');
   var slider = document.getElementById('monthSlider');
   var slLabel = document.getElementById('slLabel');
-  var favToggle = document.getElementById('favToggle');
+  var tierFilter = document.getElementById('tierFilter');
 
   // Track current MONTHS array for slider after each render
   var MONTHS = [];
@@ -45,11 +45,10 @@
     mainEl.innerHTML = '';
     slider.value = 0;
     MONTHS = [];
-    // reset favorites toggle for the new park
-    document.body.classList.remove('fav-only');
-    favToggle.classList.remove('on');
-    favToggle.textContent = '★ Favorites only';
-    favToggle.hidden = true;
+    // reset tier filter for the new park
+    document.body.classList.remove('f-listed', 'f-best');
+    setTierBtn('all');
+    tierFilter.hidden = true;
 
     var url = '/.netlify/functions/availability?park=' + encodeURIComponent(park) + '&months=' + months;
     if (start) url += '&start=' + start;
@@ -91,8 +90,8 @@
 
         mainEl.innerHTML = html;
 
-        // Show the "Favorites only" toggle only if this park has favorites
-        favToggle.hidden = !(d.sites && d.sites.some(function (s) { return s.favorite; }));
+        // Show the tier filter only if this park has any listed (best/recommended) sites
+        tierFilter.hidden = !(d.sites && d.sites.some(function (s) { return s.tier; }));
 
         // Bound startSel to the returned availability window (month input uses YYYY-MM)
         startSel.min = d.start.slice(0, 7);
@@ -173,11 +172,20 @@
     if (c) showDate(c.dataset.date);
   });
 
-  // Favorites-only toggle (registered once)
-  favToggle.addEventListener('click', function () {
-    var on = document.body.classList.toggle('fav-only');
-    favToggle.classList.toggle('on', on);
-    favToggle.textContent = on ? '★ Showing favorites only' : '★ Favorites only';
+  // Tier filter (전체 / 추천+베스트 / 베스트) — registered once
+  function setTierBtn(f) {
+    var btns = tierFilter.querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('on', btns[i].getAttribute('data-f') === f);
+    }
+  }
+  tierFilter.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-f]');
+    if (!b) return;
+    var f = b.getAttribute('data-f');
+    document.body.classList.remove('f-listed', 'f-best');
+    if (f !== 'all') document.body.classList.add('f-' + f);
+    setTierBtn(f);
     applySlider();
   });
 

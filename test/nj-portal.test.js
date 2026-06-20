@@ -16,28 +16,32 @@ test('isoUTC / parseNetDate round-trip in UTC', () => {
   const d = nj.parseNetDate('/Date(1781481600000)/');
   assert.match(nj.isoUTC(d), /^\d{4}-\d{2}-\d{2}$/);
 });
-test('markFavorites matches (zeros/suffixes/prefixes) and groups favorites first', () => {
+test('markTiers tags best/recommended/plain and orders best→recommended→plain', () => {
   const sites = [
-    { shortName: '001' }, { shortName: '005' }, { shortName: '016W' }, { shortName: '#06' },
+    { shortName: '001' }, // recommended (in sites, not best)
+    { shortName: '005' }, // best
+    { shortName: '099' }, // unlisted → plain
   ];
-  const out = nj.markFavorites(sites, ['005', '016W', '#06']);
-  // the 3 favorites come before the 1 non-favorite (intra-group order is collation-defined)
-  assert.deepEqual(out.slice(0, 3).map((s) => s.favorite), [true, true, true]);
-  assert.equal(out[3].shortName, '001');
-  assert.equal(out[3].favorite, false);
-  // matched regardless of leading zeros (005), W suffix (016W), # prefix (#06)
-  assert.ok(out.find((s) => s.shortName === '005').favorite);
-  assert.ok(out.find((s) => s.shortName === '016W').favorite);
-  assert.ok(out.find((s) => s.shortName === '#06').favorite);
+  const recommended = ['001', '005']; // the full preferred list (best is a subset)
+  const best = ['005'];
+  const out = nj.markTiers(sites, recommended, best);
+  assert.deepEqual(out.map((s) => s.shortName), ['005', '001', '099']); // best, rec, plain
+  assert.deepEqual(out.map((s) => s.tier), ['best', 'recommended', '']);
 });
-test('markFavorites with a plain number matches a zero-padded ShortName', () => {
-  const out = nj.markFavorites([{ shortName: '055' }], ['55']);
-  assert.equal(out[0].favorite, true);
+test('markTiers matching survives zeros/suffixes/prefixes', () => {
+  const out = nj.markTiers(
+    [{ shortName: '016W' }, { shortName: '#06' }, { shortName: '055' }],
+    ['016W', '055'],   // recommended
+    ['#06']            // best
+  );
+  assert.equal(out.find((s) => s.shortName === '#06').tier, 'best');     // # prefix
+  assert.equal(out.find((s) => s.shortName === '016W').tier, 'recommended'); // W suffix
+  assert.equal(out.find((s) => s.shortName === '055').tier, 'recommended'); // exact
 });
-test('markFavorites with empty favorites → all false, numeric order, non-mutating', () => {
+test('markTiers with empty lists → all plain, numeric order, non-mutating', () => {
   const sites = [{ shortName: '10' }, { shortName: '2' }];
-  const out = nj.markFavorites(sites, []);
+  const out = nj.markTiers(sites, [], []);
   assert.deepEqual(out.map((s) => s.shortName), ['2', '10']);
-  assert.ok(out.every((s) => s.favorite === false));
+  assert.ok(out.every((s) => s.tier === ''));
   assert.deepEqual(sites.map((s) => s.shortName), ['10', '2']); // original untouched
 });
