@@ -1,0 +1,11 @@
+{
+  "name": "nj-campsite-availability-web",
+  "version": "1.0.0",
+  "private": true,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "dev": "netlify dev"
+  },
+  "dependencies": { "@netlify/blobs": "^10.7.9" }
+}
