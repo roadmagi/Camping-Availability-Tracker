@@ -1,6 +1,6 @@
 'use strict';
 const nj = require('../../lib/nj-portal');
-const { getCache, setCache, fresh, availKey } = require('./_cache');
+const { getCache, setCache, fresh, connect, availKey } = require('./_cache');
 const TTL = 20 * 60 * 1000;
 
 // Coarse per-instance rate limit on COLD fetches. The cache already absorbs
@@ -21,6 +21,7 @@ exports.handler = async (event) => {
   const q = (event && event.queryStringParameters) || {};
   let key = null;
   try {
+    await connect(event);
     const parks = await nj.getParks();
     const park = parks.find((p) => String(p.id) === String(q.park));
     if (!park) return json(400, { error: 'Unknown or missing park id' });
@@ -56,6 +57,7 @@ exports.handler = async (event) => {
     await setCache('availability', key, payload);
     return json(200, payload);
   } catch (e) {
+    console.error('availability: ' + (e && e.message));
     if (key) {
       try {
         const stale = await getCache('availability', key);

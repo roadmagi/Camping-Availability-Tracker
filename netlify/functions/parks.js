@@ -1,16 +1,18 @@
 'use strict';
 const nj = require('../../lib/nj-portal');
-const { getCache, setCache, fresh } = require('./_cache');
+const { getCache, setCache, fresh, connect } = require('./_cache');
 const DAY = 24 * 60 * 60 * 1000;
 
-exports.handler = async () => {
+exports.handler = async (event) => {
   try {
+    await connect(event);
     const cached = await getCache('parks', 'list');
     if (fresh(cached, DAY)) return json(200, { parks: cached.data });
     const parks = await nj.getParks();
     await setCache('parks', 'list', parks);
     return json(200, { parks });
   } catch (e) {
+    console.error('parks: ' + (e && e.message));
     try {
       const stale = await getCache('parks', 'list');
       if (stale) return json(200, { parks: stale.data, stale: true });

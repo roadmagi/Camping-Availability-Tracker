@@ -1,9 +1,10 @@
 'use strict';
 const nj = require('../../lib/nj-portal');
-const { setCache, availKey } = require('./_cache');
+const { setCache, connect, availKey } = require('./_cache');
 const POPULAR = ['High Point', 'Stokes', 'Wharton', 'Bass River'];
 
-exports.handler = async () => {
+exports.handler = async (event) => {
+  try { await connect(event); } catch (e) { console.warn('warm: connect failed: ' + e.message); }
   for (const name of POPULAR) {
     try {
       const hits = await nj.resolvePark(name);
