@@ -75,14 +75,20 @@
 
         var desc = d.description || '';
         var html = '<div class="park">';
-        html += '<h2>' + Calendar.escapeHtml(d.parkName) +
-          (desc ? ' <span class="info-btn" title="Show recommendations & notes">ⓘ Notes</span>' : '') + '</h2>';
-        if (desc) html += '<div class="park-desc" hidden>' + Calendar.escapeHtml(desc) + '</div>';
+        html += '<h2>' + Calendar.escapeHtml(d.parkName) + '</h2>';
 
         if (d.alert) {
           html += '<div class="alert-banner">⚠ <b>' + Calendar.escapeHtml(d.alert.title) + '</b>';
           if (d.alert.body) html += '<div class="ab">' + Calendar.escapeHtml(d.alert.body) + '</div>';
           html += '</div>';
+        }
+
+        if (desc) {
+          html += '<button class="notes-bar" type="button" aria-expanded="false">' +
+            '<span class="nb-icon" aria-hidden="true">💡</span>' +
+            '<span class="nb-text">Park notes &amp; site picks</span>' +
+            '<span class="nb-cta">Tap to open ▾</span></button>';
+          html += '<div class="park-desc" hidden>' + Calendar.escapeHtml(desc) + '</div>';
         }
 
         if (!d.sites || !d.sites.length) {
@@ -177,14 +183,17 @@
     document.querySelectorAll('.cell[data-date="' + k + '"]').forEach(function (e) { e.classList.add('sel'); });
   }
   mainEl.addEventListener('click', function (e) {
-    // ⓘ toggles the park description (delegated — button is re-rendered each load)
-    var btn = e.target.closest('.info-btn');
-    if (btn) {
-      var pd = btn.closest('.park').querySelector('.park-desc');
+    // The amber notes banner toggles the park description (delegated — re-rendered each load)
+    var bar = e.target.closest('.notes-bar');
+    if (bar) {
+      var pd = bar.closest('.park').querySelector('.park-desc');
       if (pd) {
+        var opening = pd.hidden;
         pd.hidden = !pd.hidden;
-        btn.classList.toggle('open', !pd.hidden);
-        btn.textContent = pd.hidden ? 'ⓘ Notes' : '✕ Close';
+        bar.classList.toggle('open', opening);
+        bar.setAttribute('aria-expanded', String(opening));
+        var cta = bar.querySelector('.nb-cta');
+        if (cta) cta.textContent = opening ? 'Close ▴' : 'Tap to open ▾';
       }
       return;
     }

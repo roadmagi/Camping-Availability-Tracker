@@ -62,10 +62,20 @@ body.f-best .site:not(.best){display:none}
 .tier-filter button{font-size:12px;font-weight:600;padding:5px 11px;border:0;background:#fff;color:#33503f;cursor:pointer}
 .tier-filter button+button{border-left:1px solid #cdd8d1}
 .tier-filter button.on{background:#0b3d2e;color:#fff}
-.info-btn{display:inline-block;cursor:pointer;color:#fff;background:#0b3d2e;font-size:12px;font-weight:600;margin-left:9px;padding:2px 10px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.25);vertical-align:middle;white-space:nowrap}
-.info-btn:hover{background:#16604a}
-.info-btn.open{background:#b34700}
-.park-desc{font-size:13px;color:#444;line-height:1.45;max-width:900px;margin:2px 0 12px;background:#f3f6f4;border-left:3px solid #b9cabf;padding:8px 12px;border-radius:0 6px 6px 0;white-space:pre-wrap}
+/* Green "tip banner" that opens a park's notes */
+.notes-bar{display:flex;align-items:center;gap:9px;width:100%;max-width:900px;margin:4px 0 12px;padding:9px 14px;
+  font-size:13px;font-weight:600;text-align:left;color:#1f5d22;cursor:pointer;
+  background:linear-gradient(180deg,#edf7ee,#d9efdd);border:1px solid #bcd9c1;border-left:4px solid #2e7d32;border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.notes-bar:hover{background:linear-gradient(180deg,#e6f3e8,#cfe9d4)}
+.notes-bar:focus-visible{outline:2px solid #2e7d32;outline-offset:2px}
+.notes-bar .nb-icon{font-size:15px;line-height:1}
+.notes-bar .nb-text{flex:1}
+.notes-bar .nb-cta{font-size:12px;font-weight:700;color:#2e7d32;white-space:nowrap}
+.notes-bar.open{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;background:linear-gradient(180deg,#dcefe0,#c8e6cf)}
+.park-desc{font-size:13px;color:#2c3d30;line-height:1.45;max-width:900px;margin:0 0 12px;
+  background:#f4faf5;border:1px solid #bcd9c1;border-top:none;border-left:4px solid #2e7d32;
+  padding:10px 14px;border-radius:0 0 8px 8px;white-space:pre-wrap}
 .park-desc[hidden]{display:none}
 /* Campground section headers (multi-campground parks like Stokes) */
 .cg{margin-bottom:6px}
