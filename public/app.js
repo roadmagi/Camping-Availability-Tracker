@@ -18,7 +18,10 @@
 
   // Load parks on startup
   fetch('/.netlify/functions/parks')
-    .then(function (r) { return r.json(); })
+    .then(function (r) { return r.json().then(function (d) {
+      if (!r.ok || d.error) throw new Error(d.error || ('HTTP ' + r.status));
+      return d;
+    }); })
     .then(function (d) {
       if (!d.parks || !d.parks.length) { setStatus('No parks found.', true); return; }
       var sorted = d.parks.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
@@ -79,12 +82,9 @@
 
         mainEl.innerHTML = html;
 
-        // Set date-pick bounds
-        document.getElementById('datePick') && (function () {
-          var dp = document.getElementById('datePick');
-          dp.min = d.start;
-          dp.max = d.end;
-        })();
+        // Bound startSel to the returned availability window (month input uses YYYY-MM)
+        startSel.min = d.start.slice(0, 7);
+        startSel.max = d.end.slice(0, 7);
 
         // Wire slider
         wireSlider();
