@@ -38,7 +38,7 @@
   }
   // Covers either script order: auth.js may unlock synchronously before app.js runs,
   // or unlock later via the login form.
-  if (sessionStorage.getItem('camp_authed') === '1') start();
+  if (localStorage.getItem('camp_authed') === '1') start();
   else document.addEventListener('camp:unlocked', start, { once: true });
 
   function load() {

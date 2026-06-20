@@ -18,7 +18,7 @@
   var err = document.getElementById('gateErr');
 
   function unlock() {
-    try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+    try { localStorage.setItem(KEY, '1'); } catch (e) {}
     if (gate) gate.classList.add('hidden');
     document.dispatchEvent(new Event('camp:unlocked'));
   }
@@ -34,7 +34,7 @@
 
   // Already unlocked this session → skip the prompt.
   var authed = false;
-  try { authed = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+  try { authed = localStorage.getItem(KEY) === '1'; } catch (e) {}
   if (authed) { unlock(); return; }
 
   if (form) {
