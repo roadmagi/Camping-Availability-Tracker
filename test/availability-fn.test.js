@@ -42,7 +42,7 @@ test('tiers from config: best > recommended > plain (HIGH POINT)', async () => {
   } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
 });
 
-test('campgrounds from config: sites grouped + ordered Steam Mill→…→Other (STOKES)', async () => {
+test('campgrounds from config: STOKES sites grouped by prefix, ordered by config', async () => {
   if (typeof fn._resetRateLimit === 'function') fn._resetRateLimit();
   cache._setStoreFactory(async () => fakeStore());
   const origP = nj.getParks, origA = nj.getParkAvailability;
@@ -53,7 +53,7 @@ test('campgrounds from config: sites grouped + ordered Steam Mill→…→Other 
       { siteId: 1, shortName: 'L020', name: '', type: '', cost: null, days: {} }, // L → Shotwell Lean-tos
       { siteId: 2, shortName: 'T007', name: '', type: '', cost: null, days: {} }, // T0 → Oquittunk
       { siteId: 3, shortName: 'T999', name: '', type: '', cost: null, days: {} }, // T9 → no group → Other
-      { siteId: 4, shortName: 'T209', name: '', type: '', cost: null, days: {} }, // T2 → Steam Mill (favorite → best)
+      { siteId: 4, shortName: 'T209', name: '', type: '', cost: null, days: {} }, // T2 → Steam Mill
       { siteId: 5, shortName: 'T110', name: '', type: '', cost: null, days: {} }, // T1 → Shotwell
       { siteId: 6, shortName: 'C001', name: '', type: 'Cabin', cost: 55, days: {} }, // C → Oquittunk Cabins
     ],
@@ -62,10 +62,20 @@ test('campgrounds from config: sites grouped + ordered Steam Mill→…→Other 
     const r = await fn.handler({ queryStringParameters: { park: '1', months: '3' } });
     assert.equal(r.statusCode, 200);
     const body = JSON.parse(r.body);
-    assert.deepEqual(body.sites.map((s) => s.shortName), ['T209', 'T007', 'C001', 'T110', 'L020', 'T999']);
-    assert.deepEqual(body.sites.map((s) => s.campground),
-      ['Steam Mill', 'Oquittunk', 'Oquittunk Cabins', 'Shotwell', 'Shotwell Lean-tos', '']);
-    assert.equal(body.sites[0].tier, 'best'); // T209 is a Stokes favorite
+    // Each site is assigned the right campground by prefix (robust to config re-tiering/reorder).
+    const cg = Object.fromEntries(body.sites.map((s) => [s.shortName, s.campground]));
+    assert.equal(cg['T007'], 'Oquittunk');
+    assert.equal(cg['C001'], 'Oquittunk Cabins');
+    assert.equal(cg['T209'], 'Steam Mill');
+    assert.equal(cg['T110'], 'Shotwell');
+    assert.equal(cg['L020'], 'Shotwell Lean-tos');
+    assert.equal(cg['T999'], ''); // unmatched prefix → ungrouped (Other)
+    // Groups appear in the config's campground order, with ungrouped ('') always last.
+    const PREFS = require('../config/preferred-sites.json');
+    const cfgOrder = PREFS.parks.find((p) => p.park === 'STOKES STATE FOREST').campgrounds.map((c) => c.name).concat(['']);
+    const seen = [];
+    for (const s of body.sites) if (!seen.includes(s.campground)) seen.push(s.campground);
+    assert.deepEqual(seen, cfgOrder.filter((g) => seen.includes(g)));
   } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
 });
 
