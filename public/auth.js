@@ -33,6 +33,16 @@
   }
 
   // Already unlocked this session → skip the prompt.
+  // Logout button (in the header, visible only after unlock) — wired before the
+  // already-authed early-return below so it works in the logged-in state.
+  var logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function () {
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    });
+  }
+
   var authed = false;
   try { authed = localStorage.getItem(KEY) === '1'; } catch (e) {}
   if (authed) { unlock(); return; }

@@ -8,17 +8,37 @@
 </head>
 <body>
 <div id="gate" class="gate">
-  <form id="gateForm" class="gate-card" autocomplete="off">
-    <div class="gate-emoji">🏕️🔒</div>
-    <h1>NJ Campsite Availability</h1>
-    <p class="gate-sub">비밀번호를 입력하세요 · Enter password</p>
-    <input id="gatePw" type="password" placeholder="Password" aria-label="Password" autocomplete="off" />
-    <button type="submit">들어가기 · Enter</button>
-    <div id="gateErr" class="gate-err" hidden>Wrong password — try again.</div>
-  </form>
+  <div class="night" aria-hidden="true">
+    <span class="moon"></span>
+    <span class="stars"></span>
+    <span class="campfire"></span>
+    <svg class="pines" viewBox="0 0 1200 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,130 L0,70 L40,84 L70,40 L96,70 L118,30 L140,70 L150,82 L150,130 Z
+               M150,130 L150,86 L196,96 L226,52 L252,86 L150,130 Z
+               M250,130 L262,96 L300,30 L342,84 L370,56 L398,90 L420,130 Z
+               M430,130 L444,92 L478,46 L512,92 L540,64 L566,96 L590,130 Z
+               M600,130 L612,88 L648,26 L690,84 L716,52 L744,88 L766,96 L766,130 Z
+               M780,130 L794,94 L828,50 L862,96 L150,130 Z
+               M880,130 L892,90 L928,34 L970,86 L996,58 L1024,92 L1048,130 Z
+               M1060,130 L1074,92 L1110,44 L1150,92 L1178,62 L1200,96 L1200,130 Z" />
+    </svg>
+  </div>
+  <div class="sign-wrap">
+    <span class="rope rope-l" aria-hidden="true"></span>
+    <span class="rope rope-r" aria-hidden="true"></span>
+    <form id="gateForm" class="gate-card" autocomplete="off">
+      <p class="eyebrow">New Jersey · State Parks</p>
+      <h1>Campsite<br>Availability</h1>
+      <div class="sign-divider" aria-hidden="true"><span>⛺</span></div>
+      <input id="gatePw" type="password" placeholder="Password" aria-label="Password" autocomplete="off" />
+      <button type="submit">Enter</button>
+      <div id="gateErr" class="gate-err" hidden>That password didn't match. Try again.</div>
+    </form>
+  </div>
 </div>
 <header>
   <h1>🏕️ NJ Campsite Availability — live</h1>
+  <button id="logoutBtn" class="logout" type="button">Log out</button>
 </header>
 <div class="bar">
   <label>Park:
@@ -38,17 +58,17 @@
     <input type="month" id="startSel" />
   </label>
   <div class="tier-filter" id="tierFilter" hidden>
-    <button data-f="all" class="on" type="button">전체 All</button>
-    <button data-f="listed" type="button">추천+베스트</button>
-    <button data-f="best" type="button">베스트 Best</button>
+    <button data-f="all" class="on" type="button">All</button>
+    <button data-f="listed" type="button">Rec + Best</button>
+    <button data-f="best" type="button">Best</button>
   </div>
   <div class="legend">
     <span><i class="sw available"></i>Available</span>
     <span><i class="sw booked"></i>Booked</span>
     <span><i class="sw closed"></i>Closed/Unavailable</span>
     <span><i class="sw" style="box-shadow:inset 0 0 0 2px #1565c0;background:#fff"></i>Today</span>
-    <span><i class="sw" style="background:#f4c430"></i>베스트 Best</span>
-    <span><i class="sw" style="background:#2e7d32"></i>추천 Recommended</span>
+    <span><i class="sw" style="background:#f4c430"></i>Best</span>
+    <span><i class="sw" style="background:#2e7d32"></i>Recommended</span>
   </div>
   <div id="status"></div>
 </div>

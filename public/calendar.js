@@ -28,14 +28,14 @@
     }
     return '<div class="cal"><div class="mon">'+MON[m]+' '+y+'</div><div class="grid">'+cells+'</div></div>';
   }
-  // Build one site's row (label + a calendar per month). Two tiers: best (베스트)
-  // and recommended (추천) get a colored tag + sit in their own group.
+  // Build one site's row (label + a calendar per month). Two tiers: best and
+  // recommended get a colored tag + sit in their own group.
   function siteRowHtml(site,months,todayIso){
     var bits=[]; if(site.type)bits.push(site.type); if(site.cost!=null)bits.push('$'+site.cost);
     var tag=(/^[0-9]/.test(site.shortName)?'#':'')+escapeHtml(site.shortName);
     var tier=site.tier==='best'?' best':site.tier==='recommended'?' rec':'';
-    var pill=site.tier==='best'?'<span class="tier-tag best">★ 베스트</span> '
-            :site.tier==='recommended'?'<span class="tier-tag rec">추천</span> ':'';
+    var pill=site.tier==='best'?'<span class="tier-tag best">★ Best</span> '
+            :site.tier==='recommended'?'<span class="tier-tag rec">Recommended</span> ':'';
     var h='<div class="site'+tier+'"><div class="months">'+
       '<div class="lbl"><div class="lbl-id">'+pill+tag+(site.name&&!/^\d+$/.test(site.name)?' '+escapeHtml(site.name):'')+'</div>'+
       (bits.length?'<div class="lbl-sub">'+escapeHtml(bits.join(' · '))+'</div>':'')+'</div>';

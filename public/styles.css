@@ -1,8 +1,11 @@
 :root{--green:#2e7d32;--greenbg:#d7f3d8;--red:#c62828;--redbg:#fbdada;--grey:#9e9e9e;--greybg:#ececec;}
 *{box-sizing:border-box}
 body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;color:#1c1c1c;background:#fafafa}
-header{background:#0b3d2e;color:#fff;padding:18px 22px}
-header h1{margin:0 0 4px;font-size:20px}
+header{background:#0b3d2e;color:#fff;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:20px}
+.logout{flex:0 0 auto;font-size:13px;font-weight:600;color:#eaf3ee;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.35);border-radius:18px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.logout:hover{background:rgba(255,255,255,.22)}
+.logout:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #ddd;padding:12px 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
 .bar select,.bar input[type=month]{padding:6px 8px;font-size:14px}
 .bar label{font-size:14px;display:flex;align-items:center;gap:6px}
@@ -68,16 +71,69 @@ body.f-best .site:not(.best){display:none}
 .cg{margin-bottom:6px}
 .cg[hidden]{display:none}
 .cg-head{font-size:14px;font-weight:700;color:#0b3d2e;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px dashed #b9cabf}
-/* Login gate (soft client-side password screen) */
-.gate{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0b3d2e,#16604a)}
+/* Login gate — "Night at Camp" (soft client-side password screen) */
+.gate{--wood:#6b4423;--wood-dark:#4a2f18;--wood-light:#8a5a2f;--ember:#ff8a3d;--ember-glow:#ffb347;--moon-cream:#f4efe1;--sage:#a7bdaf;
+  position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 8%,#0e2c24 0%,#0a2620 42%,#06140f 100%)}
 .gate.hidden{display:none}
-.gate-card{width:100%;max-width:340px;background:#fff;border-radius:14px;padding:30px 26px 26px;box-shadow:0 12px 40px rgba(0,0,0,.35);text-align:center}
-.gate-emoji{font-size:34px;line-height:1;margin-bottom:10px}
-.gate-card h1{font-size:19px;color:#0b3d2e;margin:0 0 4px}
-.gate-sub{font-size:13px;color:#666;margin:0 0 18px}
-.gate-card input[type=password]{width:100%;padding:10px 12px;font-size:15px;border:1px solid #cdd8d1;border-radius:8px;margin-bottom:12px}
-.gate-card input[type=password]:focus{outline:none;border-color:#2e7d32;box-shadow:0 0 0 3px rgba(46,125,50,.15)}
-.gate-card button{width:100%;padding:10px 12px;font-size:15px;font-weight:600;color:#fff;background:#0b3d2e;border:0;border-radius:8px;cursor:pointer}
-.gate-card button:hover{background:#16604a}
-.gate-err{margin-top:12px;font-size:13px;color:var(--red)}
+/* Decorative night scene */
+.gate .night{position:absolute;inset:0;pointer-events:none}
+.gate .stars{position:absolute;top:6%;left:50%;width:2px;height:2px;border-radius:50%;background:transparent;
+  box-shadow:-360px 30px #fff,-300px 90px rgba(255,255,255,.7),-250px 18px #fff,-210px 130px rgba(255,255,255,.6),
+    -160px 60px #fff,-120px 12px rgba(255,255,255,.8),-80px 150px rgba(255,255,255,.5),-40px 70px #fff,
+    20px 24px rgba(255,255,255,.7),70px 110px #fff,120px 40px rgba(255,255,255,.6),170px 150px rgba(255,255,255,.7),
+    210px 24px #fff,260px 90px rgba(255,255,255,.6),320px 130px #fff,360px 50px rgba(255,255,255,.8),
+    -280px 160px rgba(255,255,255,.5),300px 18px #fff,-60px 200px rgba(255,255,255,.45),140px 200px rgba(255,255,255,.5)}
+.gate .moon{position:absolute;top:9%;right:14%;width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(circle at 38% 38%,#fffdf4,#e9e3cf);
+  box-shadow:14px 9px 0 -2px #0a2620, 0 0 34px 6px rgba(244,239,225,.28)}
+.gate .pines{position:absolute;left:0;right:0;bottom:0;width:100%;height:clamp(90px,18vh,150px);fill:var(--pine, #0b1c14);
+  filter:drop-shadow(0 -1px 0 rgba(0,0,0,.4))}
+.gate .campfire{position:absolute;left:50%;bottom:0;width:min(640px,90vw);height:240px;transform:translateX(-50%);
+  background:radial-gradient(60% 100% at 50% 100%,rgba(255,138,61,.55) 0%,rgba(255,120,40,.22) 36%,rgba(255,120,40,0) 70%);
+  pointer-events:none}
+/* Hanging trail-sign */
+.sign-wrap{position:relative;z-index:2;width:min(360px,92vw)}
+.rope{position:absolute;top:-46px;width:3px;height:50px;background:linear-gradient(var(--wood-light),var(--wood-dark));border-radius:2px;opacity:.85}
+.rope-l{left:30px;transform:rotate(11deg);transform-origin:bottom}
+.rope-r{right:30px;transform:rotate(-11deg);transform-origin:bottom}
+.rope::after{content:"";position:absolute;bottom:-3px;left:50%;width:8px;height:8px;border-radius:50%;
+  background:var(--wood);transform:translateX(-50%);box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.gate-card{position:relative;text-align:center;padding:28px 26px 22px;border-radius:12px;
+  background:linear-gradient(180deg,#7a4f29,#5e3c1f 60%,#502f17);
+  background-blend-mode:multiply;
+  border:1px solid var(--wood-dark);
+  box-shadow:inset 0 1px 0 rgba(255,210,150,.28),inset 0 0 0 2px rgba(0,0,0,.18),
+    inset 0 -3px 8px rgba(0,0,0,.4),0 18px 44px rgba(0,0,0,.55),0 0 46px rgba(255,138,61,.16)}
+.gate-card::before{content:"";position:absolute;inset:6px;border-radius:8px;pointer-events:none;
+  border:1px solid rgba(255,210,150,.16);
+  background:repeating-linear-gradient(90deg,rgba(255,225,180,.04) 0 3px,rgba(0,0,0,.05) 3px 6px)}
+.eyebrow{position:relative;margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage)}
+.gate-card h1{position:relative;margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:700;
+  font-size:clamp(24px,7vw,30px);line-height:1.12;color:var(--moon-cream);
+  text-shadow:0 1px 0 rgba(0,0,0,.55),0 -1px 0 rgba(255,225,180,.12)}
+.sign-divider{position:relative;margin:12px 0 16px;color:var(--ember-glow);font-size:15px}
+.sign-divider::before,.sign-divider::after{content:"";position:absolute;top:50%;width:34%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,210,150,.5))}
+.sign-divider::before{left:4%}.sign-divider::after{right:4%;transform:scaleX(-1)}
+.gate-card input[type=password]{position:relative;width:100%;padding:11px 13px;font-size:15px;color:var(--moon-cream);
+  background:rgba(8,16,12,.55);border:1px solid rgba(0,0,0,.45);border-radius:8px;margin-bottom:13px;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.5)}
+.gate-card input[type=password]::placeholder{color:rgba(244,239,225,.5)}
+.gate-card input[type=password]:focus{outline:none;border-color:var(--ember);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.5),0 0 0 3px rgba(255,138,61,.3)}
+.gate-card button{position:relative;width:100%;padding:11px 13px;font-size:15px;font-weight:700;letter-spacing:.02em;
+  color:#2a1606;cursor:pointer;border:0;border-radius:8px;
+  background:linear-gradient(180deg,var(--ember-glow),var(--ember));
+  box-shadow:0 2px 0 #c25f22,0 6px 18px rgba(255,138,61,.4)}
+.gate-card button:hover{background:linear-gradient(180deg,#ffc163,#ff9450);box-shadow:0 2px 0 #c25f22,0 8px 26px rgba(255,138,61,.6)}
+.gate-card button:active{transform:translateY(1px);box-shadow:0 1px 0 #c25f22,0 4px 12px rgba(255,138,61,.4)}
+.gate-card button:focus-visible{outline:2px solid var(--moon-cream);outline-offset:2px}
+.gate-err{position:relative;margin:13px 0 0;font-size:13px;font-weight:600;color:#ffb4a0}
 .gate-err[hidden]{display:none}
+@media (prefers-reduced-motion: no-preference){
+  .gate .campfire{animation:campfire-flicker 3.2s ease-in-out infinite}
+  .gate .stars{animation:stars-twinkle 4s ease-in-out infinite}
+  @keyframes campfire-flicker{0%,100%{opacity:.85;transform:translateX(-50%) scaleY(1)}45%{opacity:1;transform:translateX(-50%) scaleY(1.06)}70%{opacity:.78;transform:translateX(-50%) scaleY(.97)}}
+  @keyframes stars-twinkle{0%,100%{opacity:.9}50%{opacity:.55}}
+}

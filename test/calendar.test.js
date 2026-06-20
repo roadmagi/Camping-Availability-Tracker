@@ -40,15 +40,15 @@ test('siteRowHtml hides a purely-numeric name (loop number) but keeps the id', (
   assert.ok(!/100/.test(html.split('lbl-sub')[0])); // no stray 100 in the id label
 });
 
-test('siteRowHtml renders 베스트 tag + .best for tier best', () => {
+test('siteRowHtml renders Best tag + .best for tier best', () => {
   const site = { shortName: '07', name: 'Oak', type: '', cost: null, days: {}, tier: 'best' };
   const html = C.siteRowHtml(site, [[2026,6]], '2026-07-04');
   assert.match(html, /<div class="site best">/);
-  assert.match(html, /<span class="tier-tag best">★ 베스트<\/span>/);
+  assert.match(html, /<span class="tier-tag best">★ Best<\/span>/);
 });
-test('siteRowHtml renders 추천 tag + .rec for tier recommended', () => {
+test('siteRowHtml renders Recommended tag + .rec for tier recommended', () => {
   const site = { shortName: '12', name: '', type: '', cost: null, days: {}, tier: 'recommended' };
   const html = C.siteRowHtml(site, [[2026,6]], '2026-07-04');
   assert.match(html, /<div class="site rec">/);
-  assert.match(html, /<span class="tier-tag rec">추천<\/span>/);
+  assert.match(html, /<span class="tier-tag rec">Recommended<\/span>/);
 });

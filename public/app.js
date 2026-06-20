@@ -76,7 +76,7 @@
         var desc = d.description || '';
         var html = '<div class="park">';
         html += '<h2>' + Calendar.escapeHtml(d.parkName) +
-          (desc ? ' <span class="info-btn" title="추천 & 설명 보기">ⓘ 추천/설명</span>' : '') + '</h2>';
+          (desc ? ' <span class="info-btn" title="Show recommendations & notes">ⓘ Notes</span>' : '') + '</h2>';
         if (desc) html += '<div class="park-desc" hidden>' + Calendar.escapeHtml(desc) + '</div>';
 
         if (d.alert) {
@@ -91,7 +91,7 @@
           // Grouped by campground (sites arrive already ordered group→tier→number).
           var curCg = null;
           d.sites.forEach(function (site) {
-            var cg = site.campground || '기타 · Other';
+            var cg = site.campground || 'Other';
             if (cg !== curCg) {
               if (curCg !== null) html += '</section>';
               html += '<section class="cg"><h3 class="cg-head">⛺ ' + Calendar.escapeHtml(cg) + '</h3>';
@@ -184,7 +184,7 @@
       if (pd) {
         pd.hidden = !pd.hidden;
         btn.classList.toggle('open', !pd.hidden);
-        btn.textContent = pd.hidden ? 'ⓘ 추천/설명' : '✕ 닫기';
+        btn.textContent = pd.hidden ? 'ⓘ Notes' : '✕ Close';
       }
       return;
     }
@@ -206,7 +206,7 @@
     }
   }
 
-  // Tier filter (전체 / 추천+베스트 / 베스트) — registered once
+  // Tier filter (All / Rec + Best / Best) — registered once
   function setTierBtn(f) {
     var btns = tierFilter.querySelectorAll('button');
     for (var i = 0; i < btns.length; i++) {
