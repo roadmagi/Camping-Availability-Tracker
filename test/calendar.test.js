@@ -32,6 +32,14 @@ test('siteRowHtml renders label + one cal per month; plain tier has no tag', () 
   assert.match(html, /<div class="site">/);   // no tier class
   assert.equal((html.match(/class="cal"/g) || []).length, 2); // two months
 });
+test('siteRowHtml hides a purely-numeric name (loop number) but keeps the id', () => {
+  const site = { shortName: '011', name: '100', type: 'Tent', cost: 20, days: {} };
+  const html = C.siteRowHtml(site, [[2026, 6]], '2026-07-04');
+  assert.match(html, /#011/);
+  assert.ok(!/>#011 100</.test(html)); // loop number '100' not appended to the id
+  assert.ok(!/100/.test(html.split('lbl-sub')[0])); // no stray 100 in the id label
+});
+
 test('siteRowHtml renders 베스트 tag + .best for tier best', () => {
   const site = { shortName: '07', name: 'Oak', type: '', cost: null, days: {}, tier: 'best' };
   const html = C.siteRowHtml(site, [[2026,6]], '2026-07-04');

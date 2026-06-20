@@ -37,7 +37,7 @@
     var pill=site.tier==='best'?'<span class="tier-tag best">★ 베스트</span> '
             :site.tier==='recommended'?'<span class="tier-tag rec">추천</span> ':'';
     var h='<div class="site'+tier+'"><div class="months">'+
-      '<div class="lbl"><div class="lbl-id">'+pill+tag+(site.name?' '+escapeHtml(site.name):'')+'</div>'+
+      '<div class="lbl"><div class="lbl-id">'+pill+tag+(site.name&&!/^\d+$/.test(site.name)?' '+escapeHtml(site.name):'')+'</div>'+
       (bits.length?'<div class="lbl-sub">'+escapeHtml(bits.join(' · '))+'</div>':'')+'</div>';
     for(var i=0;i<months.length;i++) h+=renderCal(site.days,months[i][0],months[i][1],todayIso);
     return h+'</div></div>';
