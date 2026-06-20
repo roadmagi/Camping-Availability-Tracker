@@ -97,19 +97,21 @@ a long (~daily) TTL.
 GET `?park=<id>&start=<iso>&months=N`.
 - Validate `park` against the real park list; clamp `months ≤ 6`; default
   `start = today`.
-- Cache key `avail:<parkId>:<startMonth>:<months>`. Fresh (<~20 min) → return
+- Cache key `avail:<parkId>:<startIso>:<months>` (built via the shared `availKey`
+  helper in `_cache.js`, also used by `warm.js`). Fresh (<~20 min) → return
   cached JSON. Else parallel-fetch, store `{ data, fetchedAt }`, return.
 - Payload includes any closure/alert banner (`extractAlert`).
 - On portal error: return last cached value if present, else a clean error JSON
   (HTTP 200 with `{ error }` or 5xx — frontend handles both).
 
-### 5.4 `netlify/functions/warm-background.js` (scheduled)
+### 5.4 `netlify/functions/warm.js` (scheduled)
 Runs ~every 20 min (schedule in `netlify.toml`). Re-fetches a short hardcoded list
 of popular parks (e.g. High Point, Stokes, Wharton, Bass River) into the same cache
 keys so common picks are never cold.
 
 ### 5.5 Frontend `public/`
-Vanilla static — `index.html`, `app.js`, `styles.css` (no framework, no build step).
+Vanilla static — `index.html`, `app.js`, `styles.css`, plus `calendar.js` (pure,
+DOM-free render helpers, unit-tested) (no framework, no build step).
 - Park `<select>` populated from `/parks`; start-month + window controls.
 - On selection → `GET /availability` → render the **same color-coded calendar**
   (green = available, red = booked, grey = closed; click-a-day summary; horizontal
