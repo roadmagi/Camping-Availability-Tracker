@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NJ Campsite Availability</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <h1>🏕️ NJ Campsite Availability — live</h1>
+</header>
+<div class="bar">
+  <label>Park:
+    <select id="parkSel">
+      <option value="">Select a park…</option>
+    </select>
+  </label>
+  <label>Months:
+    <select id="monthsSel">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+      <option value="6">6</option>
+    </select>
+  </label>
+  <label>Start:
+    <input type="month" id="startSel" />
+  </label>
+  <div class="legend">
+    <span><i class="sw available"></i>Available</span>
+    <span><i class="sw booked"></i>Booked</span>
+    <span><i class="sw closed"></i>Closed/Unavailable</span>
+    <span><i class="sw" style="box-shadow:inset 0 0 0 2px #1565c0;background:#fff"></i>Today</span>
+  </div>
+  <div id="status"></div>
+</div>
+<main id="main"></main>
+<div class="slider-bar">
+  <span class="slider-label" id="slLabel">Months</span>
+  <button id="slPrev" title="Earlier month" aria-label="Earlier month">◀</button>
+  <input type="range" id="monthSlider" min="0" max="1000" value="0" step="1" aria-label="Scroll all calendars through the months" />
+  <button id="slNext" title="Later month" aria-label="Later month">▶</button>
+  <span class="slider-hint">drag or ◀ ▶</span>
+</div>
+<script src="calendar.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
