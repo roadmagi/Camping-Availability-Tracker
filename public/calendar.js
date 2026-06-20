@@ -28,12 +28,13 @@
     }
     return '<div class="cal"><div class="mon">'+MON[m]+' '+y+'</div><div class="grid">'+cells+'</div></div>';
   }
-  // Build one site's row (label + a calendar per month). No favorites/description.
+  // Build one site's row (label + a calendar per month). Favorites get a ★ + .fav.
   function siteRowHtml(site,months,todayIso){
     var bits=[]; if(site.type)bits.push(site.type); if(site.cost!=null)bits.push('$'+site.cost);
     var tag=(/^[0-9]/.test(site.shortName)?'#':'')+escapeHtml(site.shortName);
-    var h='<div class="site"><div class="months">'+
-      '<div class="lbl"><div class="lbl-id">'+tag+(site.name?' '+escapeHtml(site.name):'')+'</div>'+
+    var star=site.favorite?'<span class="star">★</span> ':'';
+    var h='<div class="site'+(site.favorite?' fav':'')+'"><div class="months">'+
+      '<div class="lbl"><div class="lbl-id">'+star+tag+(site.name?' '+escapeHtml(site.name):'')+'</div>'+
       (bits.length?'<div class="lbl-sub">'+escapeHtml(bits.join(' · '))+'</div>':'')+'</div>';
     for(var i=0;i<months.length;i++) h+=renderCal(site.days,months[i][0],months[i][1],todayIso);
     return h+'</div></div>';

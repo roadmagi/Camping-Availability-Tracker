@@ -19,6 +19,30 @@ test('missing park id → 400', async () => {
   } finally { nj.getParks = origP; }
 });
 
+test('favorites from config are marked + sorted first (HIGH POINT #005)', async () => {
+  if (typeof fn._resetRateLimit === 'function') fn._resetRateLimit();
+  cache._setStoreFactory(async () => fakeStore());
+  const origP = nj.getParks, origA = nj.getParkAvailability;
+  nj.getParks = async () => [{ id: '1', name: 'HIGH POINT STATE PARK' }];
+  nj.getParkAvailability = async (park) => ({
+    parkName: park.name, locationId: park.id, alert: null,
+    sites: [
+      { siteId: 1, shortName: '001', name: '', type: '', cost: null, days: {} },
+      { siteId: 5, shortName: '005', name: '', type: '', cost: null, days: {} },
+    ],
+  });
+  try {
+    const r = await fn.handler({ queryStringParameters: { park: '1', months: '3' } });
+    assert.equal(r.statusCode, 200);
+    const body = JSON.parse(r.body);
+    // HIGH POINT favorites include 005 (not 001) → 005 marked + sorted to top
+    assert.equal(body.sites[0].shortName, '005');
+    assert.equal(body.sites[0].favorite, true);
+    assert.equal(body.sites[1].shortName, '001');
+    assert.equal(body.sites[1].favorite, false);
+  } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
+});
+
 test('unknown park id → 400', async () => {
   cache._setStoreFactory(async () => fakeStore());
   const origP = nj.getParks; nj.getParks = async () => [{ id: '1', name: 'TEST' }];

@@ -44,3 +44,10 @@ main{padding:18px 22px 92px}
 html{scroll-behavior:smooth}
 #status{padding:10px 22px;font-size:14px;color:#555}
 #status.err{color:#b34700}
+.site.fav .lbl{background:#fff8e1;box-shadow:7px 0 7px -5px rgba(0,0,0,.10),inset 4px 0 0 #f4c430}
+.site.fav .lbl-id{font-weight:800;color:#7a5c00}
+.lbl .star{color:#f4b400}
+.fav-toggle{font-size:13px;padding:5px 11px;border-radius:14px;border:1px solid #e6c200;background:#fff8e1;color:#7a5c00;cursor:pointer;font-weight:600}
+.fav-toggle.on{background:#f4c430;color:#3a2c00;border-color:#caa200}
+.fav-toggle[hidden]{display:none}
+body.fav-only .site:not(.fav){display:none}

@@ -23,11 +23,18 @@ test('renderCal marks available cell clickable with data-date, and today', () =>
   assert.match(html, /class="cell booked" data-date="2026-07-05"/);
   assert.match(html, /July 2026/);
 });
-test('siteRowHtml renders label + one cal per month, no favorite star', () => {
+test('siteRowHtml renders label + one cal per month; non-favorite has no star/fav', () => {
   const site = { shortName: '07', name: 'Oak', type: 'Tent', cost: 25, days: {} };
   const html = C.siteRowHtml(site, [[2026,6],[2026,7]], '2026-07-04');
   assert.match(html, /#07 Oak/);
   assert.match(html, /\$25/);
-  assert.ok(!/★/.test(html));            // no favorite star
+  assert.ok(!/★/.test(html));                 // no favorite star
+  assert.match(html, /<div class="site">/);   // no fav class
   assert.equal((html.match(/class="cal"/g) || []).length, 2); // two months
+});
+test('siteRowHtml renders ★ and .fav class for a favorite site', () => {
+  const site = { shortName: '07', name: 'Oak', type: '', cost: null, days: {}, favorite: true };
+  const html = C.siteRowHtml(site, [[2026,6]], '2026-07-04');
+  assert.match(html, /<div class="site fav">/);
+  assert.match(html, /<span class="star">★<\/span>/);
 });

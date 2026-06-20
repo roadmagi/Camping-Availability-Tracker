@@ -1,7 +1,24 @@
 'use strict';
 const nj = require('../../lib/nj-portal');
 const { getCache, setCache, fresh, connect, availKey } = require('./_cache');
+const PREFS = require('../../config/preferred-sites.json');
 const TTL = 20 * 60 * 1000;
+
+// Build norm(parkName) -> favorites[] from the personal config (bundled at deploy).
+// Favorites are highlighted on the way OUT (egress), never stored in the cache.
+const _favByPark = {};
+for (const p of (PREFS.parks || [])) {
+  if (p && p.park && p.favorites && p.favorites.length) _favByPark[nj.norm(p.park)] = p.favorites;
+}
+function favoritesFor(parkName) {
+  const k = nj.norm(parkName);
+  if (_favByPark[k]) return _favByPark[k];
+  // fallback: loose includes match (mirrors the CLI's applyFavorites matching)
+  for (const key of Object.keys(_favByPark)) {
+    if (key && (k.includes(key) || key.includes(k))) return _favByPark[key];
+  }
+  return [];
+}
 
 // Coarse per-instance rate limit on COLD fetches. The cache already absorbs
 // most load (<=1 fetch/park/20min); this just caps a single hot instance's
@@ -19,12 +36,13 @@ function _resetRateLimit() { _rlStart = 0; _rlCount = 0; }
 
 exports.handler = async (event) => {
   const q = (event && event.queryStringParameters) || {};
-  let key = null;
+  let key = null, favs = [];
   try {
     await connect(event);
     const parks = await nj.getParks();
     const park = parks.find((p) => String(p.id) === String(q.park));
     if (!park) return json(400, { error: 'Unknown or missing park id' });
+    favs = favoritesFor(park.name);
 
     let months = parseInt(q.months, 10);
     if (!Number.isFinite(months)) months = 3;
@@ -36,11 +54,11 @@ exports.handler = async (event) => {
     key = availKey(park.id, startIso, months);
 
     const cached = await getCache('availability', key);
-    if (fresh(cached, TTL)) return json(200, cached.data);
+    if (fresh(cached, TTL)) return json(200, decorate(cached.data, favs));
 
     // A cold fetch is required — apply the rate limit.
     if (!_coldAllowed()) {
-      if (cached) return json(200, { ...cached.data, stale: true }); // expired but present
+      if (cached) return json(200, decorate({ ...cached.data, stale: true }, favs)); // expired but present
       return json(429, { error: 'Busy right now — please retry in a moment.' });
     }
 
@@ -55,13 +73,13 @@ exports.handler = async (event) => {
       sites: avail.sites,
     };
     await setCache('availability', key, payload);
-    return json(200, payload);
+    return json(200, decorate(payload, favs));
   } catch (e) {
     console.error('availability: ' + (e && e.message));
     if (key) {
       try {
         const stale = await getCache('availability', key);
-        if (stale) return json(200, { ...stale.data, stale: true });
+        if (stale) return json(200, decorate({ ...stale.data, stale: true }, favs));
       } catch (_) { /* Blobs unavailable too — fall through to 502 */ }
     }
     return json(502, { error: 'Could not load availability right now. Try again shortly.' });
@@ -70,6 +88,10 @@ exports.handler = async (event) => {
 exports._resetRateLimit = _resetRateLimit;
 exports.RATE_LIMIT_MAX = RL_MAX;
 
+// Mark + sort favorites on the response (not in the cache). favs from config.
+function decorate(data, favs) {
+  return { ...data, sites: nj.markFavorites(data.sites, favs) };
+}
 function json(status, obj) {
   return { statusCode: status, headers: { 'content-type': 'application/json' }, body: JSON.stringify(obj) };
 }

@@ -7,6 +7,7 @@
   var mainEl = document.getElementById('main');
   var slider = document.getElementById('monthSlider');
   var slLabel = document.getElementById('slLabel');
+  var favToggle = document.getElementById('favToggle');
 
   // Track current MONTHS array for slider after each render
   var MONTHS = [];
@@ -44,6 +45,11 @@
     mainEl.innerHTML = '';
     slider.value = 0;
     MONTHS = [];
+    // reset favorites toggle for the new park
+    document.body.classList.remove('fav-only');
+    favToggle.classList.remove('on');
+    favToggle.textContent = '★ Favorites only';
+    favToggle.hidden = true;
 
     var url = '/.netlify/functions/availability?park=' + encodeURIComponent(park) + '&months=' + months;
     if (start) url += '&start=' + start;
@@ -81,6 +87,9 @@
         html += '</div>';
 
         mainEl.innerHTML = html;
+
+        // Show the "Favorites only" toggle only if this park has favorites
+        favToggle.hidden = !(d.sites && d.sites.some(function (s) { return s.favorite; }));
 
         // Bound startSel to the returned availability window (month input uses YYYY-MM)
         startSel.min = d.start.slice(0, 7);
@@ -148,6 +157,14 @@
   mainEl.addEventListener('click', function (e) {
     var c = e.target.closest('.cell[data-date]');
     if (c) showDate(c.dataset.date);
+  });
+
+  // Favorites-only toggle (registered once)
+  favToggle.addEventListener('click', function () {
+    var on = document.body.classList.toggle('fav-only');
+    favToggle.classList.toggle('on', on);
+    favToggle.textContent = on ? '★ Showing favorites only' : '★ Favorites only';
+    applySlider();
   });
 
   // Control change handlers
