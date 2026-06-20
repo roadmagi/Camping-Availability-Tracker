@@ -4,21 +4,27 @@ const { getCache, setCache, fresh, connect, availKey } = require('./_cache');
 const PREFS = require('../../config/preferred-sites.json');
 const TTL = 20 * 60 * 1000;
 
-// Build norm(parkName) -> favorites[] from the personal config (bundled at deploy).
-// Favorites are highlighted on the way OUT (egress), never stored in the cache.
+// Build norm(parkName) -> favorites[] / description from the personal config
+// (bundled at deploy). Both are applied on the way OUT (egress), never cached.
 const _favByPark = {};
+const _descByPark = {};
 for (const p of (PREFS.parks || [])) {
-  if (p && p.park && p.favorites && p.favorites.length) _favByPark[nj.norm(p.park)] = p.favorites;
+  if (!p || !p.park) continue;
+  const k = nj.norm(p.park);
+  if (p.favorites && p.favorites.length) _favByPark[k] = p.favorites;
+  if (p.description) _descByPark[k] = p.description;
 }
-function favoritesFor(parkName) {
+// exact match, else loose includes (mirrors the CLI's applyFavorites matching)
+function _byPark(map, parkName) {
   const k = nj.norm(parkName);
-  if (_favByPark[k]) return _favByPark[k];
-  // fallback: loose includes match (mirrors the CLI's applyFavorites matching)
-  for (const key of Object.keys(_favByPark)) {
-    if (key && (k.includes(key) || key.includes(k))) return _favByPark[key];
+  if (map[k] != null) return map[k];
+  for (const key of Object.keys(map)) {
+    if (key && (k.includes(key) || key.includes(k))) return map[key];
   }
-  return [];
+  return undefined;
 }
+function favoritesFor(parkName) { return _byPark(_favByPark, parkName) || []; }
+function descriptionFor(parkName) { return _byPark(_descByPark, parkName) || ''; }
 
 // Coarse per-instance rate limit on COLD fetches. The cache already absorbs
 // most load (<=1 fetch/park/20min); this just caps a single hot instance's
@@ -36,13 +42,14 @@ function _resetRateLimit() { _rlStart = 0; _rlCount = 0; }
 
 exports.handler = async (event) => {
   const q = (event && event.queryStringParameters) || {};
-  let key = null, favs = [];
+  let key = null, favs = [], desc = '';
   try {
     await connect(event);
     const parks = await nj.getParks();
     const park = parks.find((p) => String(p.id) === String(q.park));
     if (!park) return json(400, { error: 'Unknown or missing park id' });
     favs = favoritesFor(park.name);
+    desc = descriptionFor(park.name);
 
     let months = parseInt(q.months, 10);
     if (!Number.isFinite(months)) months = 3;
@@ -54,11 +61,11 @@ exports.handler = async (event) => {
     key = availKey(park.id, startIso, months);
 
     const cached = await getCache('availability', key);
-    if (fresh(cached, TTL)) return json(200, decorate(cached.data, favs));
+    if (fresh(cached, TTL)) return json(200, decorate(cached.data, favs, desc));
 
     // A cold fetch is required — apply the rate limit.
     if (!_coldAllowed()) {
-      if (cached) return json(200, decorate({ ...cached.data, stale: true }, favs)); // expired but present
+      if (cached) return json(200, decorate({ ...cached.data, stale: true }, favs, desc)); // expired but present
       return json(429, { error: 'Busy right now — please retry in a moment.' });
     }
 
@@ -73,13 +80,13 @@ exports.handler = async (event) => {
       sites: avail.sites,
     };
     await setCache('availability', key, payload);
-    return json(200, decorate(payload, favs));
+    return json(200, decorate(payload, favs, desc));
   } catch (e) {
     console.error('availability: ' + (e && e.message));
     if (key) {
       try {
         const stale = await getCache('availability', key);
-        if (stale) return json(200, decorate({ ...stale.data, stale: true }, favs));
+        if (stale) return json(200, decorate({ ...stale.data, stale: true }, favs, desc));
       } catch (_) { /* Blobs unavailable too — fall through to 502 */ }
     }
     return json(502, { error: 'Could not load availability right now. Try again shortly.' });
@@ -88,9 +95,10 @@ exports.handler = async (event) => {
 exports._resetRateLimit = _resetRateLimit;
 exports.RATE_LIMIT_MAX = RL_MAX;
 
-// Mark + sort favorites on the response (not in the cache). favs from config.
-function decorate(data, favs) {
-  return { ...data, sites: nj.markFavorites(data.sites, favs) };
+// Apply favorites (mark+sort sites) and the park description on the response
+// (not in the cache). favs/desc come from the personal config.
+function decorate(data, favs, desc) {
+  return { ...data, description: desc || '', sites: nj.markFavorites(data.sites, favs) };
 }
 function json(status, obj) {
   return { statusCode: status, headers: { 'content-type': 'application/json' }, body: JSON.stringify(obj) };

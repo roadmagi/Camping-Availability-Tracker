@@ -68,8 +68,11 @@
         var _now = new Date();
         var todayIso = Calendar.iso(_now.getFullYear(), _now.getMonth(), _now.getDate());
 
+        var desc = d.description || '';
         var html = '<div class="park">';
-        html += '<h2>' + Calendar.escapeHtml(d.parkName) + '</h2>';
+        html += '<h2>' + Calendar.escapeHtml(d.parkName) +
+          (desc ? ' <span class="info-btn" title="추천 & 설명 보기">ⓘ 추천/설명</span>' : '') + '</h2>';
+        if (desc) html += '<div class="park-desc" hidden>' + Calendar.escapeHtml(desc) + '</div>';
 
         if (d.alert) {
           html += '<div class="alert-banner">⚠ <b>' + Calendar.escapeHtml(d.alert.title) + '</b>';
@@ -155,6 +158,17 @@
     document.querySelectorAll('.cell[data-date="' + k + '"]').forEach(function (e) { e.classList.add('sel'); });
   }
   mainEl.addEventListener('click', function (e) {
+    // ⓘ toggles the park description (delegated — button is re-rendered each load)
+    var btn = e.target.closest('.info-btn');
+    if (btn) {
+      var pd = btn.closest('.park').querySelector('.park-desc');
+      if (pd) {
+        pd.hidden = !pd.hidden;
+        btn.classList.toggle('open', !pd.hidden);
+        btn.textContent = pd.hidden ? 'ⓘ 추천/설명' : '✕ 닫기';
+      }
+      return;
+    }
     var c = e.target.closest('.cell[data-date]');
     if (c) showDate(c.dataset.date);
   });

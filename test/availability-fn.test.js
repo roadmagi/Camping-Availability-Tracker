@@ -43,6 +43,34 @@ test('favorites from config are marked + sorted first (HIGH POINT #005)', async 
   } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
 });
 
+test('park description from config is included in the response', async () => {
+  if (typeof fn._resetRateLimit === 'function') fn._resetRateLimit();
+  cache._setStoreFactory(async () => fakeStore());
+  const origP = nj.getParks, origA = nj.getParkAvailability;
+  nj.getParks = async () => [{ id: '1', name: 'HIGH POINT STATE PARK' }];
+  nj.getParkAvailability = async (park) => ({ parkName: park.name, locationId: park.id, alert: null, sites: [] });
+  try {
+    const r = await fn.handler({ queryStringParameters: { park: '1', months: '3' } });
+    const body = JSON.parse(r.body);
+    assert.ok(body.description && body.description.indexOf('추천') !== -1); // HIGH POINT has a Korean description
+  } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
+});
+
+test('park NOT in config → empty description, no favorites', async () => {
+  if (typeof fn._resetRateLimit === 'function') fn._resetRateLimit();
+  cache._setStoreFactory(async () => fakeStore());
+  const origP = nj.getParks, origA = nj.getParkAvailability;
+  nj.getParks = async () => [{ id: '9', name: 'SOME UNLISTED PARK' }];
+  nj.getParkAvailability = async (park) => ({ parkName: park.name, locationId: park.id, alert: null,
+    sites: [{ siteId: 1, shortName: '001', name: '', type: '', cost: null, days: {} }] });
+  try {
+    const r = await fn.handler({ queryStringParameters: { park: '9', months: '3' } });
+    const body = JSON.parse(r.body);
+    assert.equal(body.description, '');
+    assert.equal(body.sites[0].favorite, false);
+  } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
+});
+
 test('unknown park id → 400', async () => {
   cache._setStoreFactory(async () => fakeStore());
   const origP = nj.getParks; nj.getParks = async () => [{ id: '1', name: 'TEST' }];
