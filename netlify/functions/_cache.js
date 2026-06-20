@@ -20,4 +20,7 @@ async function setCache(name, key, data) {
 function fresh(entry, ttlMs) {
   return !!entry && typeof entry.fetchedAt === 'number' && (Date.now() - entry.fetchedAt) < ttlMs;
 }
-module.exports = { getCache, setCache, fresh, _setStoreFactory };
+function availKey(parkId, startIso, months) {
+  return 'avail:' + parkId + ':' + startIso + ':' + months;
+}
+module.exports = { getCache, setCache, fresh, _setStoreFactory, availKey };
