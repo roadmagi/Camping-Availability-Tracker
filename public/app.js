@@ -17,23 +17,29 @@
     statusEl.className = isErr ? 'err' : '';
   }
 
-  // Load parks on startup
-  fetch('/.netlify/functions/parks')
-    .then(function (r) { return r.json().then(function (d) {
-      if (!r.ok || d.error) throw new Error(d.error || ('HTTP ' + r.status));
-      return d;
-    }); })
-    .then(function (d) {
-      if (!d.parks || !d.parks.length) { setStatus('No parks found.', true); return; }
-      var sorted = d.parks.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      sorted.forEach(function (p) {
-        var opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = p.name;
-        parkSel.appendChild(opt);
-      });
-    })
-    .catch(function (err) { setStatus('⚠ Failed to load parks: ' + err.message, true); });
+  // Load parks once the login gate is unlocked (auth.js fires 'camp:unlocked').
+  function start() {
+    fetch('/.netlify/functions/parks')
+      .then(function (r) { return r.json().then(function (d) {
+        if (!r.ok || d.error) throw new Error(d.error || ('HTTP ' + r.status));
+        return d;
+      }); })
+      .then(function (d) {
+        if (!d.parks || !d.parks.length) { setStatus('No parks found.', true); return; }
+        var sorted = d.parks.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+        sorted.forEach(function (p) {
+          var opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.name;
+          parkSel.appendChild(opt);
+        });
+      })
+      .catch(function (err) { setStatus('⚠ Failed to load parks: ' + err.message, true); });
+  }
+  // Covers either script order: auth.js may unlock synchronously before app.js runs,
+  // or unlock later via the login form.
+  if (sessionStorage.getItem('camp_authed') === '1') start();
+  else document.addEventListener('camp:unlocked', start, { once: true });
 
   function load() {
     var park = parkSel.value;

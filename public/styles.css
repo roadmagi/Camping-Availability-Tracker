@@ -64,3 +64,16 @@ body.f-best .site:not(.best){display:none}
 .info-btn.open{background:#b34700}
 .park-desc{font-size:13px;color:#444;line-height:1.45;max-width:900px;margin:2px 0 12px;background:#f3f6f4;border-left:3px solid #b9cabf;padding:8px 12px;border-radius:0 6px 6px 0;white-space:pre-wrap}
 .park-desc[hidden]{display:none}
+/* Login gate (soft client-side password screen) */
+.gate{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0b3d2e,#16604a)}
+.gate.hidden{display:none}
+.gate-card{width:100%;max-width:340px;background:#fff;border-radius:14px;padding:30px 26px 26px;box-shadow:0 12px 40px rgba(0,0,0,.35);text-align:center}
+.gate-emoji{font-size:34px;line-height:1;margin-bottom:10px}
+.gate-card h1{font-size:19px;color:#0b3d2e;margin:0 0 4px}
+.gate-sub{font-size:13px;color:#666;margin:0 0 18px}
+.gate-card input[type=password]{width:100%;padding:10px 12px;font-size:15px;border:1px solid #cdd8d1;border-radius:8px;margin-bottom:12px}
+.gate-card input[type=password]:focus{outline:none;border-color:#2e7d32;box-shadow:0 0 0 3px rgba(46,125,50,.15)}
+.gate-card button{width:100%;padding:10px 12px;font-size:15px;font-weight:600;color:#fff;background:#0b3d2e;border:0;border-radius:8px;cursor:pointer}
+.gate-card button:hover{background:#16604a}
+.gate-err{margin-top:12px;font-size:13px;color:var(--red)}
+.gate-err[hidden]{display:none}
