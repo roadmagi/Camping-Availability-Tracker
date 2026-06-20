@@ -45,3 +45,58 @@ test('markTiers with empty lists → all plain, numeric order, non-mutating', ()
   assert.ok(out.every((s) => s.tier === ''));
   assert.deepEqual(sites.map((s) => s.shortName), ['10', '2']); // original untouched
 });
+
+const STOKES_CG = [
+  { name: 'Steam Mill', sites: ['T201', 'T209', 'T218'] },
+  { name: 'Oquittunk', sites: ['T007', 'T015'] },
+  { name: 'Shotwell Lean-tos', sites: ['L020', 'L021'] },
+];
+test('markCampgrounds tags by group, orders group→tier→number, ungrouped last', () => {
+  const sites = [
+    { shortName: 'L020', tier: '' },
+    { shortName: 'T007', tier: '' },
+    { shortName: 'T999', tier: '' },  // not in any group → Other (last)
+    { shortName: 'T209', tier: 'best' },
+    { shortName: 'T201', tier: 'recommended' },
+  ];
+  const out = nj.markCampgrounds(sites, STOKES_CG);
+  // Steam Mill first (best T209 → rec T201), then Oquittunk (T007), then Lean-tos (L020), then ungrouped (T999)
+  assert.deepEqual(out.map((s) => s.shortName), ['T209', 'T201', 'T007', 'L020', 'T999']);
+  assert.deepEqual(out.map((s) => s.campground),
+    ['Steam Mill', 'Steam Mill', 'Oquittunk', 'Shotwell Lean-tos', '']);
+});
+test('markCampgrounds matching survives zero-stripping (L020/T07)', () => {
+  const out = nj.markCampgrounds(
+    [{ shortName: 'L20', tier: '' }, { shortName: 'T7', tier: '' }],
+    STOKES_CG
+  );
+  assert.equal(out.find((s) => s.shortName === 'L20').campground, 'Shotwell Lean-tos');
+  assert.equal(out.find((s) => s.shortName === 'T7').campground, 'Oquittunk');
+});
+test('markCampgrounds is non-mutating and drops the internal sort key', () => {
+  const sites = [{ shortName: 'T015', tier: '' }, { shortName: 'T007', tier: '' }];
+  const out = nj.markCampgrounds(sites, STOKES_CG);
+  assert.deepEqual(sites.map((s) => s.shortName), ['T015', 'T007']); // original order untouched
+  assert.ok(out.every((s) => !('_gi' in s)));                        // no leaked sort key
+});
+
+test('markCampgrounds matches by prefix on raw ShortName (groups every site)', () => {
+  const cgs = [
+    { name: 'Steam Mill', prefix: 'T2' },
+    { name: 'Oquittunk', prefix: 'T0' },
+    { name: 'Oquittunk Cabins', prefix: 'C' },
+    { name: 'Shotwell Lean-tos', prefix: 'L' },
+  ];
+  const sites = [
+    { shortName: 'L023', tier: '' },          // Lean-tos (not in any curated list)
+    { shortName: 'T024', tier: '' },          // Oquittunk
+    { shortName: 'C007', tier: '' },          // Cabins
+    { shortName: 'T210', tier: 'recommended' },// Steam Mill (rec)
+    { shortName: 'T201', tier: 'best' },       // Steam Mill (best → first)
+  ];
+  const out = nj.markCampgrounds(sites, cgs);
+  assert.deepEqual(out.map((s) => s.shortName), ['T201', 'T210', 'T024', 'C007', 'L023']);
+  assert.deepEqual(out.map((s) => s.campground),
+    ['Steam Mill', 'Steam Mill', 'Oquittunk', 'Oquittunk Cabins', 'Shotwell Lean-tos']);
+  assert.ok(out.every((s) => s.campground)); // nothing falls through to Other
+});

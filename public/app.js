@@ -87,6 +87,19 @@
 
         if (!d.sites || !d.sites.length) {
           html += '<div class="none">No sites found for this park in the selected range.</div>';
+        } else if (d.sites.some(function (s) { return s.campground; })) {
+          // Grouped by campground (sites arrive already ordered group→tier→number).
+          var curCg = null;
+          d.sites.forEach(function (site) {
+            var cg = site.campground || '기타 · Other';
+            if (cg !== curCg) {
+              if (curCg !== null) html += '</section>';
+              html += '<section class="cg"><h3 class="cg-head">⛺ ' + Calendar.escapeHtml(cg) + '</h3>';
+              curCg = cg;
+            }
+            html += Calendar.siteRowHtml(site, MONTHS, todayIso);
+          });
+          if (curCg !== null) html += '</section>';
         } else {
           d.sites.forEach(function (site) {
             html += Calendar.siteRowHtml(site, MONTHS, todayIso);
@@ -95,6 +108,7 @@
         html += '</div>';
 
         mainEl.innerHTML = html;
+        refreshGroups();
 
         // Show the tier filter only if this park has any listed (best/recommended) sites
         tierFilter.hidden = !(d.sites && d.sites.some(function (s) { return s.tier; }));
@@ -178,6 +192,20 @@
     if (c) showDate(c.dataset.date);
   });
 
+  // Hide any campground section whose site rows are all filter-hidden, so the
+  // tier filter never leaves an empty header behind.
+  function refreshGroups() {
+    var secs = document.querySelectorAll('section.cg');
+    for (var i = 0; i < secs.length; i++) {
+      var sites = secs[i].querySelectorAll('.site');
+      var anyVisible = false;
+      for (var j = 0; j < sites.length; j++) {
+        if (sites[j].getClientRects().length) { anyVisible = true; break; }
+      }
+      secs[i].hidden = !anyVisible;
+    }
+  }
+
   // Tier filter (전체 / 추천+베스트 / 베스트) — registered once
   function setTierBtn(f) {
     var btns = tierFilter.querySelectorAll('button');
@@ -192,6 +220,7 @@
     document.body.classList.remove('f-listed', 'f-best');
     if (f !== 'all') document.body.classList.add('f-' + f);
     setTierBtn(f);
+    refreshGroups();
     applySlider();
   });
 

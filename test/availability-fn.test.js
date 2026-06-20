@@ -42,6 +42,33 @@ test('tiers from config: best > recommended > plain (HIGH POINT)', async () => {
   } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
 });
 
+test('campgrounds from config: sites grouped + ordered Steam Mill→…→Other (STOKES)', async () => {
+  if (typeof fn._resetRateLimit === 'function') fn._resetRateLimit();
+  cache._setStoreFactory(async () => fakeStore());
+  const origP = nj.getParks, origA = nj.getParkAvailability;
+  nj.getParks = async () => [{ id: '1', name: 'STOKES STATE FOREST' }];
+  nj.getParkAvailability = async (park) => ({
+    parkName: park.name, locationId: park.id, alert: null,
+    sites: [
+      { siteId: 1, shortName: 'L020', name: '', type: '', cost: null, days: {} }, // L → Shotwell Lean-tos
+      { siteId: 2, shortName: 'T007', name: '', type: '', cost: null, days: {} }, // T0 → Oquittunk
+      { siteId: 3, shortName: 'T999', name: '', type: '', cost: null, days: {} }, // T9 → no group → Other
+      { siteId: 4, shortName: 'T209', name: '', type: '', cost: null, days: {} }, // T2 → Steam Mill (favorite → best)
+      { siteId: 5, shortName: 'T110', name: '', type: '', cost: null, days: {} }, // T1 → Shotwell
+      { siteId: 6, shortName: 'C001', name: '', type: 'Cabin', cost: 55, days: {} }, // C → Oquittunk Cabins
+    ],
+  });
+  try {
+    const r = await fn.handler({ queryStringParameters: { park: '1', months: '3' } });
+    assert.equal(r.statusCode, 200);
+    const body = JSON.parse(r.body);
+    assert.deepEqual(body.sites.map((s) => s.shortName), ['T209', 'T007', 'C001', 'T110', 'L020', 'T999']);
+    assert.deepEqual(body.sites.map((s) => s.campground),
+      ['Steam Mill', 'Oquittunk', 'Oquittunk Cabins', 'Shotwell', 'Shotwell Lean-tos', '']);
+    assert.equal(body.sites[0].tier, 'best'); // T209 is a Stokes favorite
+  } finally { nj.getParks = origP; nj.getParkAvailability = origA; }
+});
+
 test('park description from config is included in the response', async () => {
   if (typeof fn._resetRateLimit === 'function') fn._resetRateLimit();
   cache._setStoreFactory(async () => fakeStore());

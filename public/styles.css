@@ -64,6 +64,10 @@ body.f-best .site:not(.best){display:none}
 .info-btn.open{background:#b34700}
 .park-desc{font-size:13px;color:#444;line-height:1.45;max-width:900px;margin:2px 0 12px;background:#f3f6f4;border-left:3px solid #b9cabf;padding:8px 12px;border-radius:0 6px 6px 0;white-space:pre-wrap}
 .park-desc[hidden]{display:none}
+/* Campground section headers (multi-campground parks like Stokes) */
+.cg{margin-bottom:6px}
+.cg[hidden]{display:none}
+.cg-head{font-size:14px;font-weight:700;color:#0b3d2e;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px dashed #b9cabf}
 /* Login gate (soft client-side password screen) */
 .gate{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0b3d2e,#16604a)}
 .gate.hidden{display:none}
