@@ -22,7 +22,7 @@ exports.handler = async () => {
         generatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
         sites: avail.sites,
       });
-    } catch (_) { /* skip a failing park this cycle */ }
+    } catch (e) { console.warn('warm: failed for ' + name + ': ' + e.message); }
   }
   return { statusCode: 200, body: 'warmed' };
 };

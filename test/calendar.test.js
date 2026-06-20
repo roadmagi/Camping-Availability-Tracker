@@ -8,6 +8,7 @@ test('monthsBetween spans inclusive months across a year boundary', () => {
 });
 test('escapeHtml escapes & < >', () => {
   assert.equal(C.escapeHtml('a & b <c>'), 'a &amp; b &lt;c&gt;');
+  assert.equal(C.escapeHtml('"x" \'y\''), '&quot;x&quot; &#39;y&#39;');
 });
 test('statusClass maps statuses', () => {
   assert.equal(C.statusClass('available'), 'available');

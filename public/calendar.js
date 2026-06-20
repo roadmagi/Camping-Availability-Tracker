@@ -3,7 +3,8 @@
   var WD = ['Su','Mo','Tu','We','Th','Fr','Sa'];
   var MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   function iso(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
-  function escapeHtml(s){ return String(s).replace(/[&<>]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}); }
+  // Escapes &<>"' — portal-derived fields must only be placed in element text or QUOTED attributes.
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];}); }
   function statusClass(st){ return st==='available'?'available':st==='booked'?'booked':st==='closed'?'closed':'empty'; }
   function monthsBetween(startIso,endIso){
     var sa=startIso.split('-').map(Number), ea=endIso.split('-').map(Number);
