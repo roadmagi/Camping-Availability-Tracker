@@ -11,8 +11,10 @@ exports.handler = async () => {
     await setCache('parks', 'list', parks);
     return json(200, { parks });
   } catch (e) {
-    const stale = await getCache('parks', 'list');
-    if (stale) return json(200, { parks: stale.data, stale: true });
+    try {
+      const stale = await getCache('parks', 'list');
+      if (stale) return json(200, { parks: stale.data, stale: true });
+    } catch (_) { /* Blobs unavailable too — fall through to 502 */ }
     return json(502, { error: 'Could not load park list' });
   }
 };

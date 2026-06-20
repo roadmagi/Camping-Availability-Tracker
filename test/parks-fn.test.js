@@ -6,7 +6,7 @@ const nj = require('../lib/nj-portal');
 function fakeStore() {
   const m = new Map();
   return {
-    async get(key) { return m.has(key) ? m.get(key) : null; },
+    async get(key, opts) { return m.has(key) ? m.get(key) : null; },
     async setJSON(key, val) { m.set(key, val); },
   };
 }

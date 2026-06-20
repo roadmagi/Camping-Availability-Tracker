@@ -26,5 +26,4 @@ test('setCache stores {data,fetchedAt}; getCache returns it', async () => {
   const got = await cache.getCache('store', 'k');
   assert.deepEqual(got.data, { hello: 'world' });
   assert.equal(typeof got.fetchedAt, 'number');
-  cache._setStoreFactory(undefined); // not strictly needed; each test re-sets
 });
